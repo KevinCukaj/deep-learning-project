@@ -5,19 +5,20 @@
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[Anderson(2008)]{anderson2008end}
-Anderson, C.
-\newblock The end of theory: The data deluge makes the scientific method obsolete.
-\newblock \emph{Wired magazine}, 16\penalty0 (7):\penalty0 16--07, 2008.
+\bibitem[Defferrard et~al.(2017)Defferrard, Benzi, Vandergheynst, and Bresson]{fma_dataset}
+Defferrard, M., Benzi, K., Vandergheynst, P., and Bresson, X.
+\newblock {FMA}: A dataset for music analysis.
+\newblock In \emph{18th International Society for Music Information Retrieval Conference (ISMIR)}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1612.01840}.
 
-\bibitem[D{\'e}fossez(2021)]{defossez2021hybrid}
-D{\'e}fossez, A.
-\newblock Hybrid spectrogram and waveform source separation.
-\newblock In \emph{Proceedings of the ISMIR 2021 Workshop on Music Source Separation}, 2021.
+\bibitem[Han \& Lee(2022)Han and Lee]{han2022nu}
+Han, S. and Lee, J.
+\newblock Nu-wave 2: A general neural audio upsampling model for various sampling rates.
+\newblock \emph{arXiv preprint arXiv:2206.08545}, 2022.
 
-\bibitem[Rouard et~al.(2023)Rouard, Massa, and D{\'e}fossez]{rouard2022hybrid}
-Rouard, S., Massa, F., and D{\'e}fossez, A.
-\newblock Hybrid transformers for music source separation.
-\newblock In \emph{ICASSP 23}, 2023.
+\bibitem[Liu et~al.(2024)Liu, Chen, Tian, Wang, and Plumbley]{liu2024audiosr}
+Liu, H., Chen, K., Tian, Q., Wang, W., and Plumbley, M.~D.
+\newblock {AudioSR}: Versatile audio super-resolution at scale.
+\newblock In \emph{IEEE International Conference on Acoustics, Speech and Signal Processing}, pp.\  1076--1080. IEEE, 2024.
 
 \end{thebibliography}
