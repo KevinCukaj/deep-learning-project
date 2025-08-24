@@ -113,6 +113,14 @@ Since the computational power at our disposal was very limited, and Google Colab
 We used an 80/10/10 split for training, validation, and testing. Training was performed on a single GPU with a batch size of 16 for 100 epochs.
 
 The segment length (fixed-duration chunk or slice of an audio signal that is extracted and used as an input unit for a model) was set to 16384 samples (approximately 372 ms at 44.1 kHz).
+This was done to cope with the memory limitations of the Colab environment.
+
+We added support for resuming training from previously saved checkpoints, allowing us to bypass Colab's session time limits and continue training seamlessly across multiple days.
+Of course, the original dataset split used at the start of training was preserved for consistency reasons.
+
+\subsection{Hyperparameter Tuning}
+To find good hyperparameter values, several training runs were performed.
+The final values were chosen based on the best validation loss achieved during training.  
 
 The learning rate was initialized at 0.001, and we used the Adam optimizer with a ReduceLROnPlateau scheduler that reduces the learning rate by a factor of 0.5 when validation loss does not improve for 5 epochs.
 
@@ -154,21 +162,30 @@ Quantitatively, we achieve the losses presented on Table \ref{tab:results} on th
     \label{tab:results}
 \end{table}
 
-The low and high versions of the same audio sample were given to 20 listeners for subjective evaluation.
-They reported that the restored audio sample sounded more detailed compared to the low-resolution version.
+As a subjective evaluation method, MOS (Mean Opinion Score) was used, where the low and high versions of the same audio sample were given to 20 listeners.
+Each had to give a score from 1 (Bad) to 5 (Excellent) based on their listening experience.
 The pie chart in Figure \ref{fig:qualitative} summarizes the listeners' feedback on the restored sample.
 
 \begin{figure}[!htb]
     \centering
     \begin{tikzpicture}
         \pie[
-            radius=1.3,
+            radius=1.2,
             text=legend,
+            after number={\%},
         ]{30/Good listening experience, 55/Fair listening experience, 15/Poor listening experience}
     \end{tikzpicture}
     \caption{Subjective evaluation of restored audio sample}
     \label{fig:qualitative}
 \end{figure}
+
+The final MOS score was
+\begin{align*}
+    \text{MOS} &= \frac{(5 \cdot 0) + (4 \cdot 6) + (3 \cdot 11) + (2 \cdot 3) + (1 \cdot 0)}{20} \\
+    &= 3.15
+\end{align*}
+
+All of the listeres reported that the restored audio sample sounded more detailed compared to the low-resolution version.
 
 % ------------------------------------------------------------------------------
 \section{Conclusion and Future Work}
