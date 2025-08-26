@@ -9,3 +9,11 @@
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+
+# Dataset
+fma_small/
+fma_small.zip
+
+# Output
+results/
+checkpoints/

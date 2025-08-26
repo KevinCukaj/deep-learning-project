@@ -1,0 +1,38 @@
+# Dataset configuration
+dataset:
+    url: "https://os.unil.cloud.switch.ch/fma/fma_small.zip"
+    root_dir: "./fma_small"
+    sr_orig: 44100
+    sr_low: 16000
+    max_files: 2000
+    segment_length: 65536
+
+# Training configuration
+training:
+    batch_size: 32
+    num_epochs: 100
+    learning_rate: 0.001
+    gradient_accumulation_steps: 4
+    train_ratio: 0.8
+    val_ratio: 0.1
+    test_ratio: 0.1
+    seed: 42
+    num_workers: 2
+
+# Model configuration
+model:
+    encoder_filters: [64, 128, 256, 512]
+    kernel_size: 15
+    stride: 2
+
+# STFT Loss configuration
+stft_loss:
+    fft_sizes: [512, 1024, 2048, 4096]
+    hop_sizes: [128, 256, 512, 1024]
+    win_lengths: [512, 1024, 2048, 4096]
+    window: "hann"
+
+# Directories
+dirs:
+    results_dir: "./results"
+    checkpoint_dir: "./checkpoints"
