@@ -52,7 +52,7 @@ uv run scripts/train.py --config config/default.yaml --checkpoint checkpoints/mo
 ### Evaluation
 
 ```bash
-python scripts/evaluate.py --config config/default.yaml --model checkpoints/best_model.pt --output results/evaluation.json
+uv run scripts/evaluate.py --config config/default.yaml --model checkpoints/best_model.pt --output results/evaluation.json
 ```
 
 ### Enhancement
@@ -60,13 +60,13 @@ python scripts/evaluate.py --config config/default.yaml --model checkpoints/best
 To enhance a low-quality audio file:
 
 ```bash
-python scripts/enhance.py --model checkpoints/best_model.pt --input audio/lowquality.mp3 --output audio/enhanced.wav
+uv run scripts/enhance.py --model checkpoints/best_model.pt --input audio/lowquality.mp3 --output audio/enhanced.wav
 ```
 
 To create a low-quality version and then enhance it:
 
 ```bash
-python scripts/enhance.py --model checkpoints/best_model.pt --input audio/original.mp3 --output audio/enhanced.wav --create_low_quality
+uv run scripts/enhance.py --model checkpoints/best_model.pt --input audio/original.mp3 --output audio/enhanced.wav --create_low_quality
 ```
 
 ## Dataset
