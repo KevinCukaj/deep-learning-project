@@ -85,17 +85,23 @@ For each high-resolution audio clip $x_{\text{HR}}$, we generate its low-resolut
 This procedure simulates the bandwidth limitation of low-sampling rate audio while ensuring both signals have the same dimensions for training.
 
 \subsection{Network Architecture}
-We implement a modified U-Net architecture with four encoding and decoding blocks.
-The encoder path consists of 1D convolutional layers followed by batch normalization and LeakyReLU activations.
-The decoder path uses transposed convolutions with ReLU activations and also includes batch normalization.
+Although U-Nets were originally designed for 2D image data, they can be adapted effectively to 1D audio waveforms by using 1D convolutional layers.
 
-Skip connections link the encoder and decoder at corresponding levels, helping preserve fine details that might otherwise be lost in the bottleneck.
-The network takes as input a segment of low-resolution audio and outputs the corresponding high-resolution audio of the same length.
+Our modified U-Net architecture consists of four encoding and decoding blocks.
+The encoder path, with four convolutional layers, progressively downsamples the input while increasing feature depth (1 $\rightarrow$ 64 $\rightarrow$ 128 $\rightarrow$ 256 $\rightarrow$ 512 channels).
+The decoder path uses transposed convolutions to restore the original resolution.
+The architecture incorporates skip connections that concatenate corresponding encoder and decoder features, helping preserve fine-grained information that might otherwise be lost during downsampling.
+
+Each layer uses batch normalization and appropriate activations (LeakyReLU in the encoder, ReLU in the decoder, and tanh for the output).
+
+Simply put, the network takes as input a segment of low-resolution audio and outputs the corresponding high-resolution audio of the same length.
 
 The model can be formalized as:
 \begin{equation}
 \hat{x}_{\text{HR}} = f_\theta(x_{\text{LR}})
 \end{equation}
+
+The resulting total number of parameters in the model is 5,995,457.
 
 \subsection{Training Procedure}
 As a first attempt, we used the L1-loss as our primary loss function.
