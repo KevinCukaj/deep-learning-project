@@ -15,5 +15,5 @@ fma_small/
 fma_small.zip
 
 # Output
-results/
-checkpoints/
+#results/
+#checkpoints/
