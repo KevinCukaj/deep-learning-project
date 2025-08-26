@@ -40,7 +40,7 @@
 \begin{abstract}
 This paper presents a deep learning approach for audio super-resolution.
 We implement a U-Net architecture with skip connections that directly operates on raw waveforms.
-Our method captures both temporal and frequency characteristics of audio signals, effectively reconstructing the high-frequency components lost in low-resolution recordings.
+Our method captures temporal and frequency characteristics of audio signals, able to reconstruct high-frequency components lost in low-resolution recordings.
 Experimental results demonstrate improvements in both objective metrics and subjective quality when applied to music samples from the Free Music Archive (FMA) dataset.
 \end{abstract}
 
@@ -49,20 +49,23 @@ Experimental results demonstrate improvements in both objective metrics and subj
 
 Audio super-resolution refers to the process of reconstructing high-resolution audio signals from their low-resolution counterparts. 
 This task is particularly challenging because audio signals contain complex temporal and spectral features that are easily lost when downsampled to lower rates.
-Current approaches often rely on signal processing techniques that have limitations in recovering the fine details of audio signals.
 
 In this project, we address the problem of increasing the sampling rate of audio from 16 kHz to 44.1 kHz, effectively recovering the high-frequency components (above 8 kHz) that are lost in the downsampling process.
-We propose a deep learning approach based on a modified U-Net architecture that operates directly on raw waveforms rather than time-frequency representations, allowing end-to-end training and inference without intermediate transformations.
+We propose a deep learning approach based on a U-Net architecture that operates directly on raw waveforms rather than time-frequency representations, allowing end-to-end training and inference without intermediate transformations.
 
-The code for this project is available at: \url{https://github.com/KevinCukaj/deep-learning-project}.
+The code for this project is available at the following GitHub repository: \url{https://github.com/KevinCukaj/deep-learning-project}.
 
 % ------------------------------------------------------------------------------
 \section{Related Work}
 
-Multiple models such as AudioSR \cite{liu2024audiosr} and NU-Wave2 \cite{han2022nu} were tested.
+Multiple models such as AudioSR \cite{liu2024audiosr} (adopting a U-Net), and NU-Wave2 \cite{han2022nu} (adopting a diffusion model) were tested.
 These two models were first considered as a starting point for our project.
-Unfortunately, they were not suitable for our task because either the checkpoint was not available or dependencies conflicts that we could not resolve.
-Also, the AudioSR model performances' were not satisfactory in the Colab environment, in which we would not even get an output because of the memory limitations.
+
+Other possible methods for the same task include GANs and transformers.
+
+We ultimately decided to implement our own U-Net model for direct audio super-resolution. 
+Compared to transformers or diffusion models, U-Nets are easier to train, and less memory-intensive.
+This also permitted more freedom in the design process.
 
 % ------------------------------------------------------------------------------
 \section{Method}
@@ -110,13 +113,13 @@ The STFT loss is computed as follows:
 The model was trained on the FMA small dataset containing approximately 8,000 tracks of 30-second audio clips across various genres.
 Since the computational power at our disposal was very limited, and Google Colab's free plan has its limitations, we ended up using a subset of just 2000 tracks for training.
 
-We used an 80/10/10 split for training, validation, and testing. Training was performed on a single GPU with a batch size of 16 for 100 epochs.
+We used an 80/10/10 split for training, validation, and testing. Training was performed on a single GPU with a batch size of 64 for 100 epochs.
 
-The segment length (fixed-duration chunk or slice of an audio signal that is extracted and used as an input unit for a model) was set to 16384 samples (approximately 372 ms at 44.1 kHz).
+The segment length (fixed-duration chunk or slice of an audio signal that is extracted and used as an input unit for a model) was set to 65536 samples (approximately 1.5 seconds at 44.1 kHz).
 This was done to cope with the memory limitations of the Colab environment.
 
-We added support for resuming training from previously saved checkpoints, allowing us to bypass Colab's session time limits and continue training seamlessly across multiple days.
-Of course, the original dataset split used at the start of training was preserved for consistency reasons.
+We implemented support for resuming training from previously saved checkpoints, enabling us to seamlessly continue across multiple Colab sessions and effectively bypassing session time limits.
+To ensure consistency, the original dataset split used at the start of training was preserved throughout the process.
 
 \subsection{Hyperparameter Tuning}
 To find good hyperparameter values, several training runs were performed.
@@ -135,18 +138,103 @@ We evaluate our model using both objective metrics and subjective evaluation:
 
 \subsection{Results and Discussion}
 Our model can reconstruct high-frequency components lost in low-resolution audio. 
-The training process is illustrated in Figure \ref{fig:training}, with respect to the STFT loss.
+The training process is illustrated in Figure \ref{fig:training1}, with respect to the STFT loss.
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=1\linewidth]{images/training.png}
+    \includegraphics[width=1\linewidth]{images/training1.png}
     \vspace{-0.7cm} % Reduce space between image and caption
     \caption{Training and validation losses over epochs}
-    \label{fig:training}
+    \label{fig:training1}
 \end{figure}
 
-Quantitatively, we achieve the losses presented on Table \ref{tab:results} on the test set.
+Although we set the training limit to 100 epochs, we decided to stop the training at epoch 69, since the validation loss plateaued, and because of diminishing returns.
+Nevertheless this took around 10 hours of training across multiple sessions.
 
+Quantitatively, we achieve the losses presented on Table \ref{tab:results1} on the test set.
+
+\begin{table}[!htb]
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Metric} & \textbf{Value} \\
+        \midrule
+        Average L1 Loss & 0.3652 \\
+        Average MSE Loss & 0.2439 \\
+        Average STFT Loss & 0.3219 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Quantitative results of audio super-resolution}
+    \label{tab:results1}
+\end{table}
+
+As a subjective evaluation method, MOS (Mean Opinion Score) was used, where the low resolution version and the corresponding model output of the same audio sample were given to 20 listeners.
+Each had to give a score from 1 (Bad) to 5 (Excellent) based on their listening experience.
+The pie chart in Figure \ref{fig:qualitative} summarizes the listeners' feedback on the restored sample.
+
+\begin{figure}[!htb]
+    \centering
+    \begin{tikzpicture}
+        \pie[
+            radius=1.3,
+            text=legend,
+            after number={\%},
+        ]{25/Good listening experience, 60/Fair listening experience, 15/Poor listening experience}
+    \end{tikzpicture}
+    \caption{Subjective evaluation of restored audio sample}
+    \label{fig:qualitative}
+\end{figure}
+
+The final MOS score was
+\begin{align*}
+    \text{MOS} &= \frac{(5 \cdot 0) + (4 \cdot 5) + (3 \cdot 12) + (2 \cdot 3) + (1 \cdot 0)}{20} \\
+    &= 3.1
+\end{align*}
+
+All of the listeners reported that the restored audio sample sounded more detailed compared to the low-resolution version.
+
+% ------------------------------------------------------------------------------
+\section{Conclusion and Future Work}
+
+We presented a deep learning approach for audio super-resolution that is able to reconstruct high-frequency components from low-resolution audio, through a U-Net architecture that operates directly on raw waveforms.
+
+One could possibly achieve better results by using a larger and more diverse dataset, as well as experimenting more with different combinations of hyperparameters.
+Also, a longer training time could provide better results.
+
+The primary limitation of our current approach is the segment-by-segment processing, which could introduce discontinuities at segment boundaries.
+Implementing overlap-add techniques or recurrent components could address this limitation in future iterations.
+
+% ------------------------------------------------------------------------------
+\section{Appendix}
+
+Our initial research direction focused on a multi-stage approach to audio enhancement:
+\begin{enumerate}
+    \item Source separation of mixed audio tracks into individual components (vocals, drums, bass, other) using the Demucs \cite{rouard2022hybrid} model.
+    \item Individual enhancement of each separated track.
+    \item Recombination of enhanced components into a full mix.
+\end{enumerate}
+We first thought that enhancing individual components separately would allow for more targeted improvements specific to each instrument type's frequency characteristics.
+After a feedback from the professor's assistant, we realized that this approach might not be optimal.
+
+We also noticed that the source separation quality was highly variable. Additionally, the processing time was significant (3-4 minutes per 3-minute track), and the phase coherence issues when recombining tracks led to noticeable artifacts.
+
+After abandoning the source separation approach, we evaluated existing pre-trained models for direct audio enhancement:
+We tested AudioSR, NU-Wave2 on our low-resolution samples.
+
+Unfortunately, they were not suitable for our task because either the checkpoint was not available or dependencies conflicts that we could not resolve.
+Also, the AudioSR model performances were not satisfactory in the Colab environment, upon which we heavily relied on for this project.
+Infact, we encountered issues where we would not even get an output because of the memory limitations.
+
+After settling with a U-Net, as a first model we trained on audio signals of 16384 samples (approximately 372 ms at 44.1 kHz), on a dataset of 1000 tracks from the FMA small dataset, on 100 total epochs.
+The training took approximately 2 hours, and it is illustrated in Figure \ref{fig:training2}.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=1\linewidth]{images/training2.png}
+    \vspace{-0.7cm} % Reduce space between image and caption
+    \caption{Training and validation losses over epochs}
+    \label{fig:training2}
+\end{figure}
+This resulted in the errors in Table \ref{tab:results2}.
 \begin{table}[!htb]
     \centering
     \begin{tabular}{lc}
@@ -159,44 +247,13 @@ Quantitatively, we achieve the losses presented on Table \ref{tab:results} on th
         \bottomrule
     \end{tabular}
     \caption{Quantitative results of audio super-resolution}
-    \label{tab:results}
+    \label{tab:results2}
 \end{table}
+By analyzing the output on the inference process, we observed promising results in terms of detail preservation and artifact reduction.
+Then we decided to increase the dataset size to 2000 tracks, and the audio signal segments to 65536 samples (approximately 1.5 seconds at 44.1 kHz).
+This resulted in even smaller errors, which were also more significant since the dataset used was larger.
+Unfortunately, we could not increase it any further since we maxed-out the VRAM on the GPU, and we had to train for several days due to Colab's session time limits, everytime resuming from a checkpoint.
 
-As a subjective evaluation method, MOS (Mean Opinion Score) was used, where the low and high versions of the same audio sample were given to 20 listeners.
-Each had to give a score from 1 (Bad) to 5 (Excellent) based on their listening experience.
-The pie chart in Figure \ref{fig:qualitative} summarizes the listeners' feedback on the restored sample.
-
-\begin{figure}[!htb]
-    \centering
-    \begin{tikzpicture}
-        \pie[
-            radius=1.2,
-            text=legend,
-            after number={\%},
-        ]{30/Good listening experience, 55/Fair listening experience, 15/Poor listening experience}
-    \end{tikzpicture}
-    \caption{Subjective evaluation of restored audio sample}
-    \label{fig:qualitative}
-\end{figure}
-
-The final MOS score was
-\begin{align*}
-    \text{MOS} &= \frac{(5 \cdot 0) + (4 \cdot 6) + (3 \cdot 11) + (2 \cdot 3) + (1 \cdot 0)}{20} \\
-    &= 3.15
-\end{align*}
-
-All of the listeres reported that the restored audio sample sounded more detailed compared to the low-resolution version.
-
-% ------------------------------------------------------------------------------
-\section{Conclusion and Future Work}
-
-We presented a deep learning approach for audio super-resolution that is able to reconstruct high-frequency components from low-resolution audio, through a U-Net architecture that operates directly on raw waveforms.
-
-One could possibly achieve better results by using a larger and more diverse dataset, as well as experimenting more with different combinations of hyperparameters.
-Also, a longer trainging time could provide better results, as the model was trained for only 100 epochs due to computational constraints.
-
-The primary limitation of our current approach is the segment-by-segment processing, which could introduce discontinuities at segment boundaries.
-Implementing overlap-add techniques or recurrent components could address this limitation in future iterations.
 
 \bibliography{references}
 \bibliographystyle{dlai2025}
